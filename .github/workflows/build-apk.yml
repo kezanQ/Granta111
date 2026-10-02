@@ -1,0 +1,39 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Unzip Android project
+        run: |
+          mkdir project
+          unzip -q M74CAN-Diagnostic_READY.zip -d project
+
+      - name: Find Gradle project
+        run: |
+          echo "Searching for gradlew..."
+          find project -name gradlew -type f -print
+
+      - name: Build APK
+        run: |
+          GRADLEW=$(find project -name gradlew -type f | head -n 1)
+          chmod +x "$GRADLEW"
+          cd "$(dirname "$GRADLEW")"
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Find APK
+        run: |
+          find project -name "*.apk" -type f -print
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: M74CAN-Diagnostic-APK
+          path: project/**/build/outputs/apk/**/*.apk
