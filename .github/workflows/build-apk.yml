@@ -14,7 +14,7 @@ jobs:
       - name: Unzip Android project
         run: |
           mkdir -p project
-          unzip -q M74CAN-Diagnostic_READY_FIXED.zip -d project
+          unzip -q M74CAN-Diagnostic_READY_FIXED_v2.zip -d project
 
       - name: Setup Java
         uses: actions/setup-java@v5
