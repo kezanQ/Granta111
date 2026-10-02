@@ -11,19 +11,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
       - name: Unzip Android project
         run: |
-          mkdir project
+          mkdir -p project
           unzip -q M74CAN-Diagnostic_READY.zip -d project
 
       - name: Find Gradle project
+        id: gradle
         run: |
-          echo "Searching for gradlew..."
-          find project -name gradlew -type f -print
+          GRADLEW=$(find project -name gradlew -type f | head -n 1)
+          if [ -z "$GRADLEW" ]; then
+            echo "gradlew not found"
+            find project -maxdepth 3 -type f | head -100
+            exit 1
+          fi
+          echo "GRADLEW=$GRADLEW" >> "$GITHUB_ENV"
 
       - name: Build APK
         run: |
-          GRADLEW=$(find project -name gradlew -type f | head -n 1)
           chmod +x "$GRADLEW"
           cd "$(dirname "$GRADLEW")"
           ./gradlew assembleDebug --no-daemon
